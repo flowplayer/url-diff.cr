@@ -2,7 +2,7 @@ require "./spec_helper"
 
 describe Url::Diff do
   it "detects scheme differences" do
-    diffs = Url::Diff.compare(
+    left, right, diffs = Url::Diff.compare(
       "http://example.com",
       "https://example.com")
 
@@ -12,7 +12,7 @@ describe Url::Diff do
   end
 
   it "detects hostname differences" do
-    diffs = Url::Diff.compare(
+    left, right, diffs = Url::Diff.compare(
       "https://example1.com",
       "https://example.com")
 
@@ -22,7 +22,7 @@ describe Url::Diff do
   end
 
   it "detects path differences" do
-    diffs = Url::Diff.compare(
+    left, right, diffs = Url::Diff.compare(
       "https://example.com/videos",
       "https://example.com/podcasts")
 
@@ -32,7 +32,7 @@ describe Url::Diff do
   end
 
   it "detects query param differences when both exist" do
-    diffs = Url::Diff.compare(
+    left, right, diffs = Url::Diff.compare(
       "https://example.com?taters=cold",
       "https://example.com?taters=hot")
 
@@ -43,7 +43,7 @@ describe Url::Diff do
   end
 
   it "detects query param left missing" do
-    diffs = Url::Diff.compare(
+    left, right, diffs = Url::Diff.compare(
       "https://example.com",
       "https://example.com?taters=hot")
 
@@ -55,7 +55,7 @@ describe Url::Diff do
   end
 
   it "detects query param right missing" do
-    diffs = Url::Diff.compare(
+    left, right, diffs = Url::Diff.compare(
       "https://example.com?taters=cold",
       "https://example.com?")
 

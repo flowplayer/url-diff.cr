@@ -1,5 +1,6 @@
 require "uri"
-require "./colors"
+require "./color"
+require "pretty_print"
 
 alias Report = Array(Tuple(String, String?, String?))
 
@@ -44,35 +45,42 @@ module Url::Diff
     end
   end
 
-  def self.compare(left : String, right : String)
+  def self.compare(left : String, right : String) : Tuple(String, String, Report)
     report = [] of {String, String?, String?}
-    return report if left == right
+    return {left, right, report} if left == right
     a = URI.parse left
     b = URI.parse right
     compare_scheme(report, a, b)
     compare_hostname(report, a, b)
     compare_path(report, a, b)
     compare_query_params(report, a, b)
-    return report
+    return {left, right, report}
   end
 
-  def self.view(report : Report)
+  def self.view(args)
+    left, right, report = args
+    STDOUT.puts Color.underline "comparing:\n"
+    STDOUT.puts "#{left}\n\n#{right}\n"
     STDOUT.puts Color.green "no diff" if report.empty?
+
+    STDOUT.puts Color.blue "\n\ndiffs:\n\n"
+
+    pretty = PrettyPrint.new(STDOUT)
     
     report.each do |key, left, right|
-      STDOUT.puts key + ":\n"
+      pretty.text Color.underline(key) + ":\n"
 
       if left.nil? && right.is_a?(String)
-        STDOUT.puts  "\t" + Color.red("- " + right) + "\n"
+        pretty.text  "\t" + Color.red("- " + right) + "\n"
       end
 
       if right.nil? && left.is_a?(String)
-        STDOUT.puts  "\t" + Color.green("+ " + left) + "\n"
+        pretty.text  "\t" + Color.green("+ " + left) + "\n"
       end
 
       if left.is_a?(String) && right.is_a?(String)
-        STDOUT.puts  "\t" + Color.green(left) + "\n"
-        STDOUT.puts  "\t" + Color.red(right) + "\n"
+        pretty.text  "\t" + Color.green(left) + "\n"
+        pretty.text  "\t" + Color.red(right) + "\n"
       end
     end
   end

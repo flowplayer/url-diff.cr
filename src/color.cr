@@ -13,7 +13,7 @@ module Color
   end
 
   def self.underline(str)
-    colorize(str, "4munderline")
+    colorize(str, "4")
   end
 
   def self.yellow(str)

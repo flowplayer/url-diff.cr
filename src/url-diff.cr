@@ -74,12 +74,12 @@ module Url::Diff
     end
 
     if report.empty?
-      STDOUT.puts Color.red "\nno params matching #{whitelist.join(",")} where found"
+      STDOUT.puts Color.red "\nno params matching #{whitelist.join(",")} were found"
       exit(1)
     end
     
-    STDOUT.puts Color.blue "\n\ndiffs:\n\n" if whitelist.empty?
-    STDOUT.puts Color.blue "\n\ndiffs(keys: #{whitelist.join(",")}):\n\n" unless whitelist.empty?
+    STDOUT.puts Color.blue "\n\ndiffs:\n" if whitelist.empty?
+    STDOUT.puts Color.blue "\n\ndiffs(keys: #{whitelist.join(",")}):\n" unless whitelist.empty?
 
     pretty = PrettyPrint.new(STDOUT)
     

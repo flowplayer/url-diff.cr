@@ -87,16 +87,16 @@ module Url::Diff
       pretty.text Color.underline(key) + ":\n"
 
       if left.nil? && right.is_a?(String)
-        pretty.text  "\t" + Color.red("- " + right) + "\n"
+        pretty.text  "\t - " + Color.red(right) + "\n"
       end
 
       if right.nil? && left.is_a?(String)
-        pretty.text  "\t" + Color.green("+ " + left) + "\n"
+        pretty.text  "\t + " + Color.green(left) + "\n"
       end
 
       if left.is_a?(String) && right.is_a?(String)
-        pretty.text  "\t" + Color.green(left) + "\n"
-        pretty.text  "\t" + Color.red(right) + "\n"
+        pretty.text  "\t + " + Color.green(left) + "\n"
+        pretty.text  "\t - " + Color.red(right) + "\n"
       end
     end
   end

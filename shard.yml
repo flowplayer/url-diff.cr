@@ -1,0 +1,13 @@
+name: url-diff
+version: 0.1.0
+
+authors:
+  - Benjamin Clos <benjamin.clos@gmail.com>
+
+crystal: 0.34.0
+
+license: MIT
+
+targets:
+  url-diff:
+    main: src/cli.cr

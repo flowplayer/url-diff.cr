@@ -26,13 +26,13 @@ module Url::Diff
     left = a.query_params.to_h
     right = b.query_params.to_h
 
-    left.keys.each do |k|
+    (left.keys - right.keys).each do |k|
       unless right.has_key?(k)
         report << {k, left[k], nil}
       end
     end
 
-    right.keys.each do |k|
+    (right.keys - left.keys).each do |k|
       unless left.has_key?(k)
         report << {k, nil, right[k]}
       end

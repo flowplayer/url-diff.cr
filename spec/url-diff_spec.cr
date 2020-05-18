@@ -65,4 +65,11 @@ describe Url::Diff do
     left.should eq "cold"
     left.should_not eq right
   end
+
+  it "handles macros in query params" do
+    left, right, diffs = Url::Diff.compare(
+      "https://vast.example.com/?ppid=[placeholder]&cmsid=[placeholder]&vid=[placeholder]",
+      "https://vast.example.com/?ppid=1&cmsid=1&vid=1")
+    diffs.size.should eq 3
+  end
 end

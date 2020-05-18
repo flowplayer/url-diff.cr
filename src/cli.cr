@@ -2,23 +2,28 @@ require "option_parser"
 require "./url-diff"
 
 opts = {} of Symbol => String
+whitelist = [] of String
 
-OptionParser.parse do |parser|
+parser = OptionParser.parse do |parser|
   parser.banner = <<-BANNER
     version #{Url::Diff::VERSION}
     Usage: url-diff [arguments]
   BANNER
   
-  parser.on("-l LEFT", "--left=LEFT", "left url to diff") do |left|
+  parser.on("-l LEFT", "--left=LEFT", "basis url to compare against") do |left|
     opts[:left] = left
   end
   
-  parser.on("-r RIGHT", "--right=RIGHT", "right url for diff") do |right| 
+  parser.on("-r RIGHT", "--right=RIGHT", "the secondary url") do |right| 
     opts[:right] = right
   end
 
   parser.on("-f FILE", "--file=FILE", "new line delimited pair of urls to compare") do |file|
     opts[:file] = file
+  end
+
+  parser.on("-k KEYS", "--keys=KEYS", "whitelist of diff keys to report about") do |keys|
+    whitelist.concat keys.split(",")
   end
   
   parser.on("-h", "--help", "Show this help") do
@@ -31,6 +36,12 @@ OptionParser.parse do |parser|
     STDERR.puts parser
     exit(1)
   end
+end
+
+if opts.empty?
+  puts parser
+  puts opts
+  exit(1)
 end
 
 if opts.has_key?(:file)
@@ -53,6 +64,9 @@ if opts.has_key?(:file)
   end
 end
 
-Url::Diff.view Url::Diff.compare(
+diffs = Url::Diff.compare(
   left:  opts[:left], 
   right: opts[:right])
+
+Url::Diff.view(diffs, 
+  whitelist: whitelist)

@@ -57,13 +57,29 @@ module Url::Diff
     return {left, right, report}
   end
 
-  def self.view(args)
-    left, right, report = args
+  def self.view(args, whitelist = [] of String)
+    left, right, diffs = args
     STDOUT.puts Color.underline "comparing:\n"
     STDOUT.puts "#{left}\n\n#{right}\n"
-    STDOUT.puts Color.green "no diff" if report.empty?
 
-    STDOUT.puts Color.blue "\n\ndiffs:\n\n"
+    report = if whitelist.empty? 
+      diffs
+    else
+      diffs.select {|k, lv, rv| whitelist.includes?(k) }
+    end
+
+    if diffs.empty?
+      STDOUT.puts Color.green "\nno diff" 
+      exit(0)
+    end
+
+    if report.empty?
+      STDOUT.puts Color.red "\nno params matching #{whitelist.join(",")} where found"
+      exit(1)
+    end
+    
+    STDOUT.puts Color.blue "\n\ndiffs:\n\n" if whitelist.empty?
+    STDOUT.puts Color.blue "\n\ndiffs(keys: #{whitelist.join(",")}):\n\n" unless whitelist.empty?
 
     pretty = PrettyPrint.new(STDOUT)
     

@@ -5,7 +5,7 @@ require "pretty_print"
 alias Report = Array(Tuple(String, String?, String?))
 
 module Url::Diff
-  VERSION = "0.1.0"
+  VERSION = "0.1.1"
 
   def self.compare_scheme(report : Report, a : URI, b : URI)
     return if a.scheme == b.scheme
@@ -23,44 +23,48 @@ module Url::Diff
   end
 
   def self.compare_query_params(report : Report, a : URI, b : URI)
-    left = a.query_params.to_h
-    right = b.query_params.to_h
+    baseline = a.query_params.to_h
+    against = b.query_params.to_h
 
-    (left.keys - right.keys).each do |k|
-      unless right.has_key?(k)
-        report << {k, left[k], nil}
+    (baseline.keys - against.keys).each do |k|
+      unless against.has_key?(k)
+        report << {k, baseline[k], nil}
       end
     end
 
-    (right.keys - left.keys).each do |k|
-      unless left.has_key?(k)
-        report << {k, nil, right[k]}
+    (against.keys - baseline.keys).each do |k|
+      unless baseline.has_key?(k)
+        report << {k, nil, against[k]}
       end
     end
 
-    (left.keys & right.keys).each do |k|
-      unless left[k] == right[k]
-        report << {k, left[k], right[k]}
+    (baseline.keys & against.keys).each do |k|
+      unless baseline[k] == against[k]
+        report << {k, baseline[k], against[k]}
       end
     end
   end
 
-  def self.compare(left : String, right : String) : Tuple(String, String, Report)
+  def self.compare(baseline : Tuple(String, String), against : Tuple(String,String)) : Tuple(String, String, Report)
     report = [] of {String, String?, String?}
-    return {left, right, report} if left == right
-    a = URI.parse left
-    b = URI.parse right
+    return {baseline[0], against[0], report} if baseline == against
+    a = URI.parse baseline[1]
+    b = URI.parse against[1]
     compare_scheme(report, a, b)
     compare_hostname(report, a, b)
     compare_path(report, a, b)
     compare_query_params(report, a, b)
-    return {left, right, report}
+    return {baseline[0], against[0], report}
+  end
+
+  def self.compare(baseline : String, against : String)
+    compare({baseline, baseline}, {against, against})
   end
 
   def self.view(args, whitelist = [] of String)
-    left, right, diffs = args
+    baseline, against, diffs = args
     STDOUT.puts Color.underline "comparing:\n"
-    STDOUT.puts "#{left}\n\n#{right}\n"
+    STDOUT.puts "baseline: #{baseline}\n against: #{against}\n"
 
     report = if whitelist.empty? 
       diffs
@@ -83,20 +87,20 @@ module Url::Diff
 
     pretty = PrettyPrint.new(STDOUT)
     
-    report.each do |key, left, right|
+    report.each do |key, baseline, against|
       pretty.text Color.underline(key) + ":\n"
 
-      if left.nil? && right.is_a?(String)
-        pretty.text  "\t - " + Color.red(right) + "\n"
+      if baseline.nil? && against.is_a?(String)
+        pretty.text  "\t - " + Color.red(against) + "\n"
       end
 
-      if right.nil? && left.is_a?(String)
-        pretty.text  "\t + " + Color.green(left) + "\n"
+      if against.nil? && baseline.is_a?(String)
+        pretty.text  "\t + " + Color.green(baseline) + "\n"
       end
 
-      if left.is_a?(String) && right.is_a?(String)
-        pretty.text  "\t + " + Color.green(left) + "\n"
-        pretty.text  "\t - " + Color.red(right) + "\n"
+      if baseline.is_a?(String) && against.is_a?(String)
+        pretty.text  "\t + " + Color.green(baseline) + "\n"
+        pretty.text  "\t - " + Color.red(against) + "\n"
       end
     end
   end

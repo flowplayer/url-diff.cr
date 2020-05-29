@@ -2,7 +2,7 @@ require "./spec_helper"
 
 describe Url::Diff do
   it "detects scheme differences" do
-    left, right, diffs = Url::Diff.compare(
+    baseline, against, diffs = Url::Diff.compare(
       "http://example.com",
       "https://example.com")
 
@@ -12,7 +12,7 @@ describe Url::Diff do
   end
 
   it "detects hostname differences" do
-    left, right, diffs = Url::Diff.compare(
+    baseline, against, diffs = Url::Diff.compare(
       "https://example1.com",
       "https://example.com")
 
@@ -22,7 +22,7 @@ describe Url::Diff do
   end
 
   it "detects path differences" do
-    left, right, diffs = Url::Diff.compare(
+    baseline, against, diffs = Url::Diff.compare(
       "https://example.com/videos",
       "https://example.com/podcasts")
 
@@ -32,42 +32,42 @@ describe Url::Diff do
   end
 
   it "detects query param differences when both exist" do
-    left, right, diffs = Url::Diff.compare(
+    baseline, against, diffs = Url::Diff.compare(
       "https://example.com?taters=cold",
       "https://example.com?taters=hot")
 
     diffs.size.should eq 1
-    param, left, right = diffs.first
+    param, baseline, against = diffs.first
     param.should eq "taters"
-    left.should_not eq right
+    baseline.should_not eq against
   end
 
-  it "detects query param left missing" do
-    left, right, diffs = Url::Diff.compare(
+  it "detects query param baseline missing" do
+    baseline, against, diffs = Url::Diff.compare(
       "https://example.com",
       "https://example.com?taters=hot")
 
     diffs.size.should eq 1
-    param, left, right = diffs.first
+    param, baseline, against = diffs.first
     param.should eq "taters"
-    left.should eq nil
-    left.should_not eq right
+    baseline.should eq nil
+    baseline.should_not eq against
   end
 
-  it "detects query param right missing" do
-    left, right, diffs = Url::Diff.compare(
+  it "detects query param against missing" do
+    baseline, against, diffs = Url::Diff.compare(
       "https://example.com?taters=cold",
       "https://example.com?")
 
     diffs.size.should eq 1
-    param, left, right = diffs.first
+    param, baseline, against = diffs.first
     param.should eq "taters"
-    left.should eq "cold"
-    left.should_not eq right
+    baseline.should eq "cold"
+    baseline.should_not eq against
   end
 
   it "handles macros in query params" do
-    left, right, diffs = Url::Diff.compare(
+    baseline, against, diffs = Url::Diff.compare(
       "https://vast.example.com/?ppid=[placeholder]&cmsid=[placeholder]&vid=[placeholder]",
       "https://vast.example.com/?ppid=1&cmsid=1&vid=1")
     diffs.size.should eq 3

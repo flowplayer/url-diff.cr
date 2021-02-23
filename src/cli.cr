@@ -9,12 +9,12 @@ parser = OptionParser.parse do |parser|
     version #{Url::Diff::VERSION}
     Usage: url-diff [arguments]
   BANNER
-  
+
   parser.on("-b baseline", "--baseline=baseline", "basis url to compare against") do |baseline|
     opts[:baseline] = baseline
   end
-  
-  parser.on("-a against", "--against=against", "the secondary url") do |against| 
+
+  parser.on("-a against", "--against=against", "the secondary url") do |against|
     opts[:against] = against
   end
 
@@ -25,12 +25,12 @@ parser = OptionParser.parse do |parser|
   parser.on("-k KEYS", "--keys=KEYS", "whitelist of diff keys to report about") do |keys|
     whitelist.concat keys.split(",")
   end
-  
+
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
   end
-  
+
   parser.invalid_option do |flag|
     STDERR.puts Color.red "ERROR: #{flag} is not a valid option."
     STDERR.puts parser
@@ -49,7 +49,7 @@ if opts.has_key?(:file)
   raise "file name must be a string" unless file.is_a?(String)
 
   urls = File.read(file).split("\n").reject{|line| line.empty? || line.starts_with?("#") }
-  
+
   if urls.empty?
     raise "urls file was empty"
   end
@@ -80,10 +80,13 @@ end
 baseline = opts[:baseline]
 against  = opts[:against]
 
+baseline = {baseline, baseline} if baseline.is_a?(String)
+against  = {against, against}   if against.is_a?(String)
+
 raise "baseline must be a Tuple(String, String)" unless baseline.is_a?(Tuple(String, String))
 raise "against must be a Tuple(String, String)" unless against.is_a?(Tuple(String, String))
 
 diffs = Url::Diff.compare(baseline: baseline, against: against)
 
-Url::Diff.view(diffs, 
+Url::Diff.view(diffs,
   whitelist: whitelist)
